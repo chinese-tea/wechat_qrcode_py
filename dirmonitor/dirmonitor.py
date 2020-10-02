@@ -37,6 +37,7 @@ class DirMonitor():
             file_increment = new_dir_files.file_count() - old_dir_files.file_count()
             if file_increment > 0 :
                 print("new add %d files" % file_increment)
+                print(new_dir_files.file_increments_list(old_dir_files.file_count()))
                 old_dir_files = new_dir_files
             #queue = Queue()
             #queue.put(self.target_dir)
