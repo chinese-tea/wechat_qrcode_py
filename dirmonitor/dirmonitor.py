@@ -6,6 +6,7 @@ import atexit
 from queue import Queue
 import time
 import re
+import file_util
 
 
 class DirMonitor():
@@ -30,24 +31,29 @@ class DirMonitor():
 
     def _monitor(self):
         self._update_ignore()
+        old_files = file_util.dir_files(self.target_dir)
         while True:
-            queue = Queue()
-            queue.put(self.target_dir)
+            new_files = file_util.dir_files(self.target_dir)
+            file_increment = file_util.file_count(new_files) - file_util.file_count(old_files)
+            if file_increment > 0 :
+                print("new add %d files" % file_increment)
+                old_files = new_files
+            #queue = Queue()
+            #queue.put(self.target_dir)
             # Check modification times on all files under local_dir.
-            while not queue.empty():
-                dir_path = queue.get()
-                for item in os.listdir(dir_path):
-                    item_path = os.path.join(dir_path, item)
-                    if not self._ignored(item_path):
-                        if os.path.isdir(item_path):
-                            queue.put(item_path)
-                        elif self._modified(item_path):
-                            if item == ".gitignore":
-                                self._update_ignore()
-                            thread = threading.Thread(target=self.callback, args=(item_path,))
-                            thread.start()
-                            self._threads.append(thread)
-
+            #while not queue.empty():
+                #dir_path = queue.get()
+                #for item in os.listdir(dir_path):
+                    # item_path = os.path.join(dir_path, item)
+                    # if not self._ignored(item_path):
+                        # if os.path.isdir(item_path):
+                            # queue.put(item_path)
+                        # elif self._modified(item_path):
+                            # if item == ".gitignore":
+                                # self._update_ignore()
+                            # thread = threading.Thread(target=self.callback, args=(item_path,))
+                            # thread.start()
+                            # self._threads.append(thread)                                                 
             time.sleep(1)
 
     def _ignored(self, item_path):
