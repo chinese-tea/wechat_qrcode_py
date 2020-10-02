@@ -6,7 +6,7 @@ import atexit
 from queue import Queue
 import time
 import re
-import file_util
+from file_util import DirFiles
 
 
 class DirMonitor():
@@ -31,13 +31,13 @@ class DirMonitor():
 
     def _monitor(self):
         self._update_ignore()
-        old_files = file_util.dir_files(self.target_dir)
+        old_dir_files = DirFiles(dir_path = self.target_dir)
         while True:
-            new_files = file_util.dir_files(self.target_dir)
-            file_increment = file_util.file_count(new_files) - file_util.file_count(old_files)
+            new_dir_files = DirFiles(dir_path = self.target_dir)
+            file_increment = new_dir_files.file_count() - old_dir_files.file_count()
             if file_increment > 0 :
                 print("new add %d files" % file_increment)
-                old_files = new_files
+                old_dir_files = new_dir_files
             #queue = Queue()
             #queue.put(self.target_dir)
             # Check modification times on all files under local_dir.

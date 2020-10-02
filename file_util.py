@@ -1,7 +1,12 @@
 import os
 
-def file_count(files):
-    return len(files)
+class DirFiles():
+    files = []
     
-def dir_files(dir_path):
-    return os.listdir(dir_path)
+    def __init__(self, dir_path):
+        self.files = os.listdir(dir_path)
+    
+    def file_count(self):
+        return len(self.files)
+        
+
