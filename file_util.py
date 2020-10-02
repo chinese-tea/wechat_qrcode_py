@@ -17,7 +17,10 @@ class DirFiles():
         return self.files[start:self.file_count():]
         
     def compare(self, file):
-        return os.stat(self.dir_path + "/" + file).st_ctime
+        return os.stat(self.path_name(file)).st_ctime
+        
+    def path_name(self, file):
+        return self.dir_path + "/" + file
 
 
     

@@ -7,6 +7,7 @@ from queue import Queue
 import time
 import re
 from file_util import DirFiles
+import qrdecode
 
 
 class DirMonitor():
@@ -36,8 +37,11 @@ class DirMonitor():
             new_dir_files = DirFiles(dir_path = self.target_dir)
             file_increment = new_dir_files.file_count() - old_dir_files.file_count()
             if file_increment > 0 :
-                print("new add %d files" % file_increment)
-                print(new_dir_files.file_increments_list(old_dir_files.file_count()))
+                file_increments_list = new_dir_files.file_increments_list(old_dir_files.file_count())
+                for file in file_increments_list:
+                    decode = qrdecode.decode(new_dir_files.path_name(file))
+                    if decode.find('https://weixin.qq.com/g/') != -1:
+                        print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), new_dir_files.path_name(file)))
                 old_dir_files = new_dir_files
             #queue = Queue()
             #queue.put(self.target_dir)
