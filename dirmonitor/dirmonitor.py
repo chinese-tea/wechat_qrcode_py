@@ -50,8 +50,11 @@ class DirMonitor():
                     decoded_img_path = wechat_image_decode.decode_dat(dat_file_path, new_file_path)
                     #然后再识别图片内容是否是群二维码
                     decode = qrdecode.decode(decoded_img_path)
+                    #只保留是群二维码的图片，不是的删除
                     if decode.find('https://weixin.qq.com/g/') != -1:
                         print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
+                    else:
+                        os.remove(decoded_img_path)
                 old_dir_files = new_dir_files
             #queue = Queue()
             #queue.put(self.target_dir)
