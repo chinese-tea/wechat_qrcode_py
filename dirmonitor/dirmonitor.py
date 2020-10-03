@@ -8,15 +8,17 @@ import time
 import re
 from file_util import DirFiles
 import qrdecode
+import wechat_image_decode
 
 
 class DirMonitor():
     _interval = 1.0
 
-    def __init__(self, callback=None, target=None):
+    def __init__(self, callback=None, target=None, destination=None):
         if not target:
             raise Exception("target path cannot be None!")
         self.target_dir = target if not target[-1] == "/" else target[:-1]
+        self.destination = destination if not destination[-1] == "/" else destination[:-1]
         self._times = {}
         self._files = []
         self._running = False
@@ -39,9 +41,17 @@ class DirMonitor():
             if file_increment > 0 :
                 file_increments_list = new_dir_files.file_increments_list(old_dir_files.file_count())
                 for file in file_increments_list:
-                    decode = qrdecode.decode(new_dir_files.path_name(file))
+                    if file[-4:] != '.dat':
+                        continue
+                        
+                    dat_file_path = new_dir_files.path_name(file)
+                    new_file_path = self.destination + "\\" + file
+                    #先把dat解码成图片
+                    decoded_img_path = wechat_image_decode.decode_dat(dat_file_path, new_file_path)
+                    #然后再识别图片内容是否是群二维码
+                    decode = qrdecode.decode(decoded_img_path)
                     if decode.find('https://weixin.qq.com/g/') != -1:
-                        print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), new_dir_files.path_name(file)))
+                        print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
                 old_dir_files = new_dir_files
             #queue = Queue()
             #queue.put(self.target_dir)

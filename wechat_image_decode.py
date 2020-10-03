@@ -1,6 +1,7 @@
 
 #来源：https://blog.csdn.net/theLeMon/article/details/105471160?utm_medium=distribute.pc_relevant.none-task-blog-title-1&spm=1001.2101.3001.4242
 import os
+import os.path
 # 图片字节头信息，
 # [0][1]为jpg头信息，
 # [2][3]为png头信息，
@@ -33,24 +34,25 @@ def get_code(file_path):
     return 0
 
 
-def decode_dat(file_path):
+def decode_dat(file_path, new_file_path):
     """
     解密文件，并生成图片
     :param file_path: dat文件路径
+    :param new_file_path: 解码后存放图片的路径
     :return: 无
     """
     decode_code = get_code(file_path)
     dat_file = open(file_path, "rb")
-    pic_name = file_path + ".jpg"
+    pic_name = new_file_path + ".jpg"
     pic_write = open(pic_name, "wb")
     for dat_data in dat_file:
         for dat_byte in dat_data:
             pic_data = dat_byte ^ decode_code
             pic_write.write(bytes([pic_data]))
-    print(pic_name + "完成")
+    #print(pic_name + "完成")
     dat_file.close()
     pic_write.close()
-
+    return pic_name
 
 def find_datfile(dir_path):
     """
@@ -61,7 +63,12 @@ def find_datfile(dir_path):
     files_list = os.listdir(dir_path)
     for file_name in files_list:
         file_path = dir_path + "\\" + file_name
-        decode_dat(file_path)
+        decoded_dir_path = dir_path + "\\decode"
+        new_file_path = decoded_dir_path + "\\" + file_name
+        #解码目录不存在则创建
+        if not os.path.isdir(decoded_dir_path):
+            os.mkdir(decoded_dir_path)
+        decode_dat(file_path, new_file_path)
 
 def main():
     path = input("请输入需要解密微信dat文件的目录:")
