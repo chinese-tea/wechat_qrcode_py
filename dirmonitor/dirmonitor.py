@@ -7,8 +7,17 @@ from queue import Queue
 import time
 import re
 from file_util import DirFiles
-import qrdecode
+
 import wechat_image_decode
+
+from pyzbar.pyzbar import decode
+from PIL import Image
+from PIL import ImageFile 
+
+
+#PIL遇到截断图片报错，解决方法参考https://blog.csdn.net/scool_winter/article/details/89426509
+#LOAD_TRUNCATED_IMAGES不是存在 Image模块，而是在ImageFile模块
+ImageFile.LOAD_TRUNCATED_IMAGES = True 
 
 
 class DirMonitor():
@@ -49,12 +58,20 @@ class DirMonitor():
                     #先把dat解码成图片
                     decoded_img_path = wechat_image_decode.decode_dat(dat_file_path, new_file_path)
                     #然后再识别图片内容是否是群二维码
-                    decode = qrdecode.decode(decoded_img_path)
-                    #只保留是群二维码的图片，不是的删除
-                    if decode.find('https://weixin.qq.com/g/') != -1:
-                        print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
-                    else:
+                    img = Image.open(decoded_img_path)
+                    barcodes = decode(img)
+                    is_qrcode = False
+                    for barcode in barcodes:
+                        url = barcode.data.decode("utf-8")
+                        #print(url)
+                        #只保留是群二维码的图片，不是的删除
+                        if url.find('https://weixin.qq.com/g/') != -1:
+                            print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
+                            is_qrcode = True
+                    if not is_qrcode:
+                        print(decoded_img_path)
                         os.remove(decoded_img_path)
+
                 old_dir_files = new_dir_files
             #queue = Queue()
             #queue.put(self.target_dir)
