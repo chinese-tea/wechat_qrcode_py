@@ -54,7 +54,11 @@ class DirMonitor():
                         continue
                         
                     dat_file_path = new_dir_files.path_name(file)
-                    new_file_path = self.destination + "\\" + file
+                    new_name = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+                    new_file_path = self.destination + "\\" + new_name
+                    #先检查下读写权限，避免报权限错误
+                    if not (os.access(dat_file_path, os.F_OK) and os.access(dat_file_path, os.R_OK)):
+                        continue
                     #先把dat解码成图片
                     decoded_img_path = wechat_image_decode.decode_dat(dat_file_path, new_file_path)
                     #然后再识别图片内容是否是群二维码
@@ -69,7 +73,7 @@ class DirMonitor():
                             print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
                             is_qrcode = True
                     if not is_qrcode:
-                        print(decoded_img_path)
+                        print("[%s] %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
                         os.remove(decoded_img_path)
 
                 old_dir_files = new_dir_files
