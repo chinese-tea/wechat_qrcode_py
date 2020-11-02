@@ -49,13 +49,22 @@ class DirMonitor():
             file_increment = new_dir_files.file_count() - old_dir_files.file_count()
             if file_increment > 0 :
                 file_increments_list = new_dir_files.file_increments_list(old_dir_files.file_count())
+                last_new_name = ""
+                count = 1  
                 for file in file_increments_list:
                     if file[-4:] != '.dat':
                         continue
                         
                     dat_file_path = new_dir_files.path_name(file)
                     new_name = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-                    new_file_path = self.destination + "\\" + new_name
+                    #防止一种情况是，程序卡住不动，突然回车然后一秒钟内加了几张二维码，后面的会把前面的给覆盖，所以需要count来计数
+                    if new_name == last_new_name:
+                        count += 1
+                    else:
+                        count = 1
+                    last_new_name = new_name
+                    
+                    new_file_path = self.destination + "\\" + new_name + "_" + str(count)
                     #先检查下读写权限，避免报权限错误
                     if not (os.access(dat_file_path, os.F_OK) and os.access(dat_file_path, os.R_OK)):
                         continue
