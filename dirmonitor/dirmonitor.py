@@ -87,6 +87,7 @@ class DirMonitor():
                             os.remove(decoded_img_path)
                     except Exception as e:
                         print(e)
+                        os.remove(decoded_img_path)
 
                 old_dir_files = new_dir_files
             #queue = Queue()
