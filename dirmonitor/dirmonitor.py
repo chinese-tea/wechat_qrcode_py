@@ -71,19 +71,22 @@ class DirMonitor():
                     #先把dat解码成图片
                     decoded_img_path = wechat_image_decode.decode_dat(dat_file_path, new_file_path)
                     #然后再识别图片内容是否是群二维码
-                    img = Image.open(decoded_img_path)
-                    barcodes = decode(img)
-                    is_qrcode = False
-                    for barcode in barcodes:
-                        url = barcode.data.decode("utf-8")
-                        #print(url)
-                        #只保留是群二维码的图片，不是的删除
-                        if url.find('https://weixin.qq.com/g/') != -1:
-                            print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
-                            is_qrcode = True
-                    if not is_qrcode:
-                        print("[%s] %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
-                        os.remove(decoded_img_path)
+                    try:
+                        img = Image.open(decoded_img_path)
+                        barcodes = decode(img)
+                        is_qrcode = False
+                        for barcode in barcodes:
+                            url = barcode.data.decode("utf-8")
+                            #print(url)
+                            #只保留是群二维码的图片，不是的删除
+                            if url.find('https://weixin.qq.com/g/') != -1:
+                                print("[%s]new add qrcode %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
+                                is_qrcode = True
+                        if not is_qrcode:
+                            print("[%s] %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), decoded_img_path))
+                            os.remove(decoded_img_path)
+                    except Exception as e:
+                        print(e)
 
                 old_dir_files = new_dir_files
             #queue = Queue()
